@@ -157,12 +157,8 @@ import { useInjectWorkflowId } from '@/app/composables/useInjectWorkflowId';
 import { injectWorkflowDocumentStore } from '@/app/stores/workflowDocument.store';
 import { useUnusableWorkflowCredentials } from '@/features/credentials/composables/useUnusableWorkflowCredentials';
 
-import {
-	N8nCallout,
-	N8nCanvasThinkingPill,
-	N8nCanvasCollaborationPill,
-	N8nLogo,
-} from '@n8n/design-system';
+import { N8nCallout, N8nCanvasThinkingPill, N8nCanvasCollaborationPill } from '@n8n/design-system';
+import WitnessOpsLogo from '@/app/components/WitnessOpsLogo.vue';
 import { useWorkflowHelpers } from '../composables/useWorkflowHelpers';
 import { useEmptyCanvasGroupsFlag } from '@/features/workflows/canvas/composables/useEmptyCanvasGroupsFlag';
 import { findTriggerNodeToAutoSelect } from '@/features/execution/executions/executions.utils';
@@ -2281,10 +2277,9 @@ onBeforeUnmount(() => {
 		>
 			<div :class="$style.canvasTopLeftContainer">
 				<div :class="$style.canvasTopLeft">
-					<N8nLogo
+					<WitnessOpsLogo
 						v-if="isCanvasOnlyLogoVisible"
 						size="small"
-						:collapsed="false"
 						:class="$style.canvasOnlyLogo"
 						aria-hidden="true"
 					/>
