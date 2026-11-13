@@ -543,16 +543,16 @@ describe('SecuritySettings', () => {
 				false;
 		});
 
-		it('should show upgrade badges on sharing and publishing titles', async () => {
+		it('should show license badges on sharing and publishing titles', async () => {
 			const { getAllByText, getByTestId } = renderView();
 
 			await waitFor(() => {
 				expect(getByTestId('security-personal-space-sharing-toggle')).toBeInTheDocument();
 			});
 
-			// Two upgrade badges for sharing + publishing (plus one for MFA if unlicensed)
-			const upgradeBadges = getAllByText('Upgrade');
-			expect(upgradeBadges.length).toBeGreaterThanOrEqual(2);
+			// Two license badges for sharing and publishing.
+			const licenseBadges = getAllByText('License required');
+			expect(licenseBadges.length).toBeGreaterThanOrEqual(2);
 		});
 
 		it('should render disabled sharing toggle when unlicensed', async () => {
@@ -766,7 +766,7 @@ describe('SecuritySettings', () => {
 			expect(getByTestId('redaction-enforcement-scope-select')).toHaveAttribute('data-disabled');
 		});
 
-		it('should render scope dropdown with Upgrade badge when unlicensed and not enforced', async () => {
+		it('should render scope dropdown with license badge when unlicensed and not enforced', async () => {
 			settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.DataRedaction] = false;
 
 			const { getAllByText, getByTestId } = renderView();
@@ -778,7 +778,7 @@ describe('SecuritySettings', () => {
 			expect(getByTestId('redaction-enforcement-scope-row')).toBeInTheDocument();
 			expect(getByTestId('redaction-enforcement-scope-select')).toHaveAttribute('data-disabled');
 			// One badge on the toggle row, one on the scope row.
-			expect(getAllByText('Upgrade').length).toBeGreaterThanOrEqual(2);
+			expect(getAllByText('License required').length).toBeGreaterThanOrEqual(2);
 			// Summary reflects stored floor='off' while the disabled dropdown previews 'production'.
 			expect(getByTestId('redaction-enforcement-summary')).toHaveTextContent('No executions');
 		});
@@ -886,7 +886,7 @@ describe('SecuritySettings', () => {
 				expect(getByTestId('enable-redaction-enforcement')).toHaveAttribute('data-disabled');
 			});
 
-			it('should show the Upgrade badges and disabled scope dropdown when endpoint 403s', async () => {
+			it('should show license badges and disabled scope dropdown when endpoint 403s', async () => {
 				const { getByTestId, getAllByText } = renderView();
 
 				await waitFor(() => {
@@ -896,7 +896,7 @@ describe('SecuritySettings', () => {
 				expect(getByTestId('redaction-enforcement-scope-row')).toBeInTheDocument();
 				expect(getByTestId('redaction-enforcement-scope-select')).toHaveAttribute('data-disabled');
 				// One badge on the toggle row, one on the scope row.
-				expect(getAllByText('Upgrade').length).toBeGreaterThanOrEqual(2);
+				expect(getAllByText('License required').length).toBeGreaterThanOrEqual(2);
 				// Defaults to floor 'off' when state never resolves.
 				expect(getByTestId('redaction-enforcement-summary')).toHaveTextContent('No executions');
 			});

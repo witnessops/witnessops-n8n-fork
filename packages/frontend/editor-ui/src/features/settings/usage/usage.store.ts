@@ -7,7 +7,12 @@ import { useSettingsStore } from '@n8n/stores/settings.store';
 
 export type UsageTelemetry = {
 	instance_id: string;
-	action: 'view_plans' | 'manage_plan' | 'add_activation_key' | 'desktop_view_plans';
+	action:
+		| 'view_plans'
+		| 'view_license_options'
+		| 'manage_plan'
+		| 'add_activation_key'
+		| 'desktop_view_plans';
 	plan_name_current: string;
 	usage: number;
 	quota: number;

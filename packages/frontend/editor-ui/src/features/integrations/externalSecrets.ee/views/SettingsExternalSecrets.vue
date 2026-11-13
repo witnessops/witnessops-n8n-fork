@@ -7,6 +7,7 @@ import { computed, onMounted } from 'vue';
 import ExternalSecretsProviderCard from '../components/ExternalSecretsProviderCard.ee.vue';
 import type { ExternalSecretsProvider } from '../externalSecrets.types';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 import { I18nT } from 'vue-i18n';
 
 import { N8nEmptyState, N8nCallout, N8nHeading } from '@n8n/design-system';
@@ -15,6 +16,7 @@ const externalSecretsStore = useExternalSecretsStore();
 const toast = useToast();
 const documentTitle = useDocumentTitle();
 const pageRedirectionHelper = usePageRedirectionHelper();
+const settingsStore = useSettingsStore();
 
 const sortedProviders = computed(() => {
 	return ([...externalSecretsStore.providers] as ExternalSecretsProvider[]).sort((a, b) => {
@@ -61,11 +63,19 @@ function goToUpgrade() {
 			v-else
 			class="mt-2xl mb-l"
 			data-test-id="external-secrets-content-unlicensed"
-			:button-text="i18n.baseText('settings.externalSecrets.actionBox.buttonText')"
+			:button-text="
+				settingsStore.isCloudDeployment
+					? i18n.baseText('settings.externalSecrets.actionBox.buttonText')
+					: i18n.baseText('generic.licenseDetails')
+			"
 			@click="goToUpgrade"
 		>
 			<template #heading>
-				<span>{{ i18n.baseText('settings.externalSecrets.actionBox.title') }}</span>
+				<span>{{
+					settingsStore.isCloudDeployment
+						? i18n.baseText('settings.externalSecrets.actionBox.title')
+						: i18n.baseText('generic.licenseRequired')
+				}}</span>
 			</template>
 			<template #description>
 				<I18nT keypath="settings.externalSecrets.actionBox.description" scope="global">

@@ -8,6 +8,7 @@ import { useSSOStore, SupportedProtocols } from '../sso.store';
 import { createComponentRenderer } from '@/__tests__/render';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import type { SamlPreferencesExtractedData } from '@n8n/rest-api-client/api/sso';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 
 const renderView = createComponentRenderer(SettingsSso);
 
@@ -81,10 +82,13 @@ Object.defineProperty(window, 'open', {
 
 describe('SettingsSso View', () => {
 	let ssoStore: MockedStore<typeof useSSOStore>;
+	let settingsStore: ReturnType<typeof useSettingsStore>;
 
 	beforeEach(() => {
 		createTestingPinia();
 		ssoStore = mockedStore(useSSOStore);
+		settingsStore = useSettingsStore();
+		settingsStore.settings.deployment = { type: 'default' };
 	});
 
 	afterEach(() => {
@@ -97,7 +101,7 @@ describe('SettingsSso View', () => {
 	});
 
 	describe('SAML', () => {
-		it('should show upgrade banner when enterprise SAML is disabled', async () => {
+		it('should show license details when enterprise SAML is disabled on self-hosted', async () => {
 			ssoStore.isEnterpriseSamlEnabled = false;
 			ssoStore.isEnterpriseOidcEnabled = false;
 
@@ -109,9 +113,22 @@ describe('SettingsSso View', () => {
 
 			const actionBox = getByTestId('sso-content-unlicensed');
 			expect(actionBox).toBeInTheDocument();
+			expect(within(actionBox).getByText('License required')).toBeInTheDocument();
 
-			await userEvent.click(await within(actionBox).findByText('See plans'));
+			await userEvent.click(await within(actionBox).findByText('License details'));
 			expect(pageRedirectionHelper.goToUpgrade).toHaveBeenCalledWith('sso', 'upgrade-sso');
+		});
+
+		it('should retain the plan prompt on Cloud', () => {
+			settingsStore.settings.deployment = { type: 'cloud' };
+			ssoStore.isEnterpriseSamlEnabled = false;
+			ssoStore.isEnterpriseOidcEnabled = false;
+
+			const { getByTestId } = renderView();
+			const actionBox = getByTestId('sso-content-unlicensed');
+
+			expect(within(actionBox).getByText('Available on the Enterprise plan')).toBeInTheDocument();
+			expect(within(actionBox).getByText('See plans')).toBeInTheDocument();
 		});
 
 		it('should show user SSO config', async () => {
@@ -451,7 +468,7 @@ describe('SettingsSso View', () => {
 	});
 
 	describe('OIDC', () => {
-		it('should show upgrade banner when enterprise OIDC is disabled', async () => {
+		it('should show license details when enterprise OIDC is disabled on self-hosted', async () => {
 			ssoStore.isDefaultAuthenticationSaml = false;
 			ssoStore.isEnterpriseSamlEnabled = false;
 
@@ -468,7 +485,7 @@ describe('SettingsSso View', () => {
 			});
 
 			await userEvent.click(
-				await within(getByTestId('sso-content-unlicensed')).findByText('See plans'),
+				await within(getByTestId('sso-content-unlicensed')).findByText('License details'),
 			);
 			expect(pageRedirectionHelper.goToUpgrade).toHaveBeenCalledWith('sso', 'upgrade-sso');
 		});

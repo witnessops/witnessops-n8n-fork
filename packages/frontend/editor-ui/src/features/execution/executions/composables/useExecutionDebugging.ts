@@ -206,7 +206,11 @@ export const useExecutionDebugging = () => {
 			uiStore.openModalWithData({
 				name: DEBUG_PAYWALL_MODAL_KEY,
 				data: {
-					title: i18n.baseText('executionsList.debug.paywall.title'),
+					title: i18n.baseText(
+						settingsStore.isCloudDeployment
+							? 'executionsList.debug.paywall.title'
+							: 'executionsList.debug.paywall.title.selfHosted',
+					),
 					footerButtonAction: () => {
 						uiStore.closeModal(DEBUG_PAYWALL_MODAL_KEY);
 						void pageRedirectionHelper.goToUpgrade('debug', 'upgrade-debug');

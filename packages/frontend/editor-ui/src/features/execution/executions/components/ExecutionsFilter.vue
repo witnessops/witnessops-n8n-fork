@@ -65,6 +65,16 @@ const isAdvancedExecutionFilterEnabled = computed(
 	() => settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.AdvancedExecutionFilters],
 );
 const isAnnotationFiltersEnabled = computed(() => isAdvancedExecutionFilterEnabled.value);
+const customDataTooltipKey = computed(() =>
+	settingsStore.isCloudDeployment
+		? 'executionsFilter.customData.inputTooltip'
+		: 'executionsFilter.customData.inputTooltip.selfHosted',
+);
+const customDataTooltipLinkKey = computed(() =>
+	settingsStore.isCloudDeployment
+		? 'executionsFilter.customData.inputTooltip.link'
+		: 'generic.licenseDetails',
+);
 
 const getDefaultFilter = (): ExecutionFilterType => ({
 	status: 'all',
@@ -403,13 +413,13 @@ onBeforeMount(() => {
 						}}</label>
 						<N8nTooltip :disabled="isAdvancedExecutionFilterEnabled" placement="top">
 							<template #content>
-								<I18nT tag="span" keypath="executionsFilter.customData.inputTooltip" scope="global">
+								<I18nT tag="span" :keypath="customDataTooltipKey" scope="global">
 									<template #link>
 										<a
 											href="#"
 											data-test-id="executions-filter-view-plans-link"
 											@click.prevent="goToUpgrade"
-											>{{ locale.baseText('executionsFilter.customData.inputTooltip.link') }}</a
+											>{{ locale.baseText(customDataTooltipLinkKey) }}</a
 										>
 									</template>
 								</I18nT>
@@ -428,14 +438,10 @@ onBeforeMount(() => {
 						<div :class="$style.checkboxWrapper">
 							<N8nTooltip :disabled="isAdvancedExecutionFilterEnabled" placement="top">
 								<template #content>
-									<I18nT
-										tag="span"
-										keypath="executionsFilter.customData.inputTooltip"
-										scope="global"
-									>
+									<I18nT tag="span" :keypath="customDataTooltipKey" scope="global">
 										<template #link>
 											<a href="#" @click.prevent="goToUpgrade">{{
-												locale.baseText('executionsFilter.customData.inputTooltip.link')
+												locale.baseText(customDataTooltipLinkKey)
 											}}</a>
 										</template>
 									</I18nT>
@@ -454,10 +460,10 @@ onBeforeMount(() => {
 						}}</label>
 						<N8nTooltip :disabled="isAdvancedExecutionFilterEnabled" placement="top">
 							<template #content>
-								<I18nT tag="span" keypath="executionsFilter.customData.inputTooltip" scope="global">
+								<I18nT tag="span" :keypath="customDataTooltipKey" scope="global">
 									<template #link>
 										<a href="#" @click.prevent="goToUpgrade">{{
-											locale.baseText('executionsFilter.customData.inputTooltip.link')
+											locale.baseText(customDataTooltipLinkKey)
 										}}</a>
 									</template>
 								</I18nT>

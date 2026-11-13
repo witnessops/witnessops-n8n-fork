@@ -45,8 +45,33 @@ const isRateLimitSettingsEnabled = computed(() =>
 	posthogStore.isFeatureEnabled(PUBLIC_API_RATE_LIMIT_SETTINGS_FLAG),
 );
 
-const mfaTooltipKey = 'settings.personal.mfa.enforce.unlicensed_tooltip';
-const personalSpaceTooltipKey = 'settings.security.personalSpace.unlicensed_tooltip';
+const mfaTooltipKey = computed(() =>
+	settingsStore.isCloudDeployment
+		? 'settings.personal.mfa.enforce.unlicensed_tooltip'
+		: 'settings.personal.mfa.enforce.unlicensed_tooltip.selfHosted',
+);
+const personalSpaceTooltipKey = computed(() =>
+	settingsStore.isCloudDeployment
+		? 'settings.security.personalSpace.unlicensed_tooltip'
+		: 'settings.security.personalSpace.unlicensed_tooltip.selfHosted',
+);
+const unlicensedBadgeLabel = computed(() =>
+	i18n.baseText(settingsStore.isCloudDeployment ? 'generic.upgrade' : 'generic.licenseRequired'),
+);
+const mfaLinkLabel = computed(() =>
+	i18n.baseText(
+		settingsStore.isCloudDeployment
+			? 'settings.personal.mfa.enforce.unlicensed_tooltip.link'
+			: 'generic.licenseDetails',
+	),
+);
+const personalSpaceLinkLabel = computed(() =>
+	i18n.baseText(
+		settingsStore.isCloudDeployment
+			? 'settings.security.personalSpace.unlicensed_tooltip.link'
+			: 'generic.licenseDetails',
+	),
+);
 const showPublishingDialog = ref(false);
 const showSharingDialog = ref(false);
 
@@ -215,7 +240,7 @@ const sharingCountText = computed(() => {
 						<N8nText :bold="true">
 							{{ i18n.baseText('settings.personal.mfa.enforce.title') }}
 							<N8nBadge v-if="!isEnforceMFAEnabled" class="ml-4xs">
-								{{ i18n.baseText('generic.upgrade') }}
+								{{ unlicensedBadgeLabel }}
 							</N8nBadge>
 						</N8nText>
 						<N8nText size="small" color="text-light">
@@ -242,9 +267,7 @@ const sharingCountText = computed(() => {
 										<I18nT :keypath="mfaTooltipKey" tag="span" scope="global">
 											<template #action>
 												<a @click="goToUpgrade">
-													{{
-														i18n.baseText('settings.personal.mfa.enforce.unlicensed_tooltip.link')
-													}}
+													{{ mfaLinkLabel }}
 												</a>
 											</template>
 										</I18nT>
@@ -273,7 +296,7 @@ const sharingCountText = computed(() => {
 						<N8nText :bold="true">
 							{{ i18n.baseText('settings.security.personalSpace.sharing.title') }}
 							<N8nBadge v-if="!isPersonalSpacePolicyLicensed" class="ml-4xs">
-								{{ i18n.baseText('generic.upgrade') }}
+								{{ unlicensedBadgeLabel }}
 							</N8nBadge>
 						</N8nText>
 						<N8nText size="small" color="text-light">
@@ -302,9 +325,7 @@ const sharingCountText = computed(() => {
 										<I18nT :keypath="personalSpaceTooltipKey" tag="span" scope="global">
 											<template #action>
 												<a @click="goToUpgrade">
-													{{
-														i18n.baseText('settings.security.personalSpace.unlicensed_tooltip.link')
-													}}
+													{{ personalSpaceLinkLabel }}
 												</a>
 											</template>
 										</I18nT>
@@ -332,7 +353,7 @@ const sharingCountText = computed(() => {
 						<N8nText :bold="true">
 							{{ i18n.baseText('settings.security.personalSpace.publishing.title') }}
 							<N8nBadge v-if="!isPersonalSpacePolicyLicensed" class="ml-4xs">
-								{{ i18n.baseText('generic.upgrade') }}
+								{{ unlicensedBadgeLabel }}
 							</N8nBadge>
 						</N8nText>
 						<N8nText size="small" color="text-light">
@@ -361,9 +382,7 @@ const sharingCountText = computed(() => {
 										<I18nT :keypath="personalSpaceTooltipKey" tag="span" scope="global">
 											<template #action>
 												<a @click="goToUpgrade">
-													{{
-														i18n.baseText('settings.security.personalSpace.unlicensed_tooltip.link')
-													}}
+													{{ personalSpaceLinkLabel }}
 												</a>
 											</template>
 										</I18nT>

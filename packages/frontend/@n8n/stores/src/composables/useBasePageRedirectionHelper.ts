@@ -1,5 +1,8 @@
 import { useTelemetry } from '@n8n/composables/useTelemetry';
-import { N8N_PRICING_PAGE_URL } from '@n8n/frontend-constants/urls';
+import {
+	N8N_PRICING_PAGE_URL,
+	N8N_SELF_HOSTED_LICENSE_INFO_URL,
+} from '@n8n/frontend-constants/urls';
 
 import { useCloudPlanStore } from '../cloudPlan.store';
 import { getDefaultUpgradeRedirectGuard } from '../registries/upgradeRedirectGuard';
@@ -104,7 +107,8 @@ export function useBasePageRedirectionHelper({ guard }: { guard?: UpgradeRedirec
 	/**
 	 * If the user is an instance owner in the cloud, it generates an auto-login link to the
 	 * Cloud console that redirects the user to the /account/change-plan page where they upgrade/downgrade the current plan.
-	 * Otherwise, it redirect them our website.
+	 * Self-hosted users see their instance license details or the edition guide.
+	 * Other cloud users see the public pricing page.
 	 */
 
 	const goToUpgrade = async (
@@ -127,6 +131,21 @@ export function useBasePageRedirectionHelper({ guard }: { guard?: UpgradeRedirec
 			executionsLeft,
 			workflowsLeft,
 		});
+
+		if (!settingsStore.isCloudDeployment) {
+			if (settingsStore.settings.hideUsagePage) {
+				if (mode === 'open') {
+					window.open(N8N_SELF_HOSTED_LICENSE_INFO_URL, '_blank', 'noopener');
+				} else {
+					location.href = N8N_SELF_HOSTED_LICENSE_INFO_URL;
+				}
+			} else {
+				const origin = new URL(window.location.href).origin;
+				const basePath = new URL(window.BASE_PATH ?? '/', origin).pathname.replace(/\/?$/, '/');
+				location.href = new URL(`${basePath}settings/usage`, origin).toString();
+			}
+			return;
+		}
 
 		const upgradeLink = await generateUpgradeLink(source, utm_campaign);
 

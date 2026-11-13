@@ -266,7 +266,7 @@ describe('ExecutionsFilter', () => {
 		expect(filterChangedEvents.length).toBeGreaterThan(0);
 	});
 
-	test('shows upgrade link when advanced filters disabled', async () => {
+	test('shows license details when advanced filters are disabled on self-hosted instances', async () => {
 		settingsStore.settings.enterprise.advancedExecutionFilters = false;
 
 		const { getByTestId } = renderComponent();
@@ -277,8 +277,25 @@ describe('ExecutionsFilter', () => {
 		const keyInput = getByTestId('execution-filter-saved-data-key-input');
 		expect(keyInput).toBeInTheDocument();
 
-		// Hover and verify tooltip shows upgrade message
+		// Hover and verify the license message.
 		await hoverTooltipTrigger(keyInput);
+		await waitFor(() => {
+			const tooltip = getTooltip();
+			expect(tooltip).toHaveTextContent(
+				'The current license does not include filtering executions by custom data',
+			);
+			expect(tooltip).toHaveTextContent('License details');
+		});
+	});
+
+	test('keeps plan copy for Cloud when advanced filters are disabled', async () => {
+		settingsStore.settings.enterprise.advancedExecutionFilters = false;
+		settingsStore.settings.deployment = { type: 'cloud' };
+
+		const { getByTestId } = renderComponent();
+		await userEvent.click(getByTestId('executions-filter-button'));
+		await hoverTooltipTrigger(getByTestId('execution-filter-saved-data-key-input'));
+
 		await waitFor(() => {
 			const tooltip = getTooltip();
 			expect(tooltip).toHaveTextContent('Upgrade plan to filter executions by custom data');

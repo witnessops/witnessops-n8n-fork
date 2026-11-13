@@ -44,7 +44,20 @@ describe('SettingsExternalSecrets', () => {
 		const { getByTestId, queryByTestId } = renderComponent({ pinia });
 
 		expect(queryByTestId('external-secrets-content-licensed')).not.toBeInTheDocument();
-		expect(getByTestId('external-secrets-content-unlicensed')).toBeInTheDocument();
+		const paywall = getByTestId('external-secrets-content-unlicensed');
+		expect(paywall).toBeInTheDocument();
+		expect(paywall).toHaveTextContent('License required');
+		expect(paywall).toHaveTextContent('License details');
+	});
+
+	it('should retain the plan prompt on Cloud', () => {
+		settingsStore.settings.deployment = { type: 'cloud' };
+
+		const { getByTestId } = renderComponent({ pinia });
+		const paywall = getByTestId('external-secrets-content-unlicensed');
+
+		expect(paywall).toHaveTextContent('Available on the Enterprise plan');
+		expect(paywall).toHaveTextContent('See plans');
 	});
 
 	it('should render licensed content', () => {

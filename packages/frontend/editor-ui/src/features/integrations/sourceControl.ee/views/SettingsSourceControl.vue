@@ -5,6 +5,7 @@ import { useLoadingService } from '@/app/composables/useLoadingService';
 import { useMessage } from '@/app/composables/useMessage';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import { useToast } from '@n8n/composables/useToast';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 import { MODAL_CONFIRM } from '@/app/constants';
 import { useEnvironmentsVersionSwitch } from '@/features/shared/promotions/useEnvironmentsVersionSwitch';
 import { usePromotionsEnabled } from '@/features/shared/promotions/usePromotionsEnabled';
@@ -37,6 +38,7 @@ import {
 } from '@n8n/design-system';
 const locale = useI18n();
 const sourceControlStore = useSourceControlStore();
+const settingsStore = useSettingsStore();
 const pageRedirectionHelper = usePageRedirectionHelper();
 const toast = useToast();
 const message = useMessage();
@@ -579,15 +581,39 @@ watch(connectionType, () => {
 			v-else
 			data-test-id="source-control-content-unlicensed"
 			:class="$style.actionBox"
-			:description="locale.baseText('settings.sourceControl.actionBox.description')"
-			:button-text="locale.baseText('settings.sourceControl.actionBox.buttonText')"
+			:description="
+				locale.baseText(
+					settingsStore.isCloudDeployment
+						? 'settings.sourceControl.actionBox.description'
+						: 'settings.sourceControl.actionBox.license.description',
+				)
+			"
+			:button-text="
+				locale.baseText(
+					settingsStore.isCloudDeployment
+						? 'settings.sourceControl.actionBox.buttonText'
+						: 'generic.licenseDetails',
+				)
+			"
 			@click:button="goToUpgrade"
 		>
 			<template #heading>
-				<span>{{ locale.baseText('settings.sourceControl.actionBox.title') }}</span>
+				<span>{{
+					locale.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.sourceControl.actionBox.title'
+							: 'settings.sourceControl.actionBox.license.title',
+					)
+				}}</span>
 			</template>
 			<template #description>
-				{{ locale.baseText('settings.sourceControl.actionBox.description') }}
+				{{
+					locale.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.sourceControl.actionBox.description'
+							: 'settings.sourceControl.actionBox.license.description',
+					)
+				}}
 				<a :href="locale.baseText('settings.sourceControl.docs.url')" target="_blank">
 					{{ locale.baseText('settings.sourceControl.actionBox.description.link') }}
 				</a>

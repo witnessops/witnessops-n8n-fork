@@ -44,9 +44,10 @@ vi.mock('./useAssistantTopUpEligibility', () => ({
 }));
 
 /** Only `deployment.type` steers this composable; the rest of the settings object is stubbed. */
-const settingsFor = (type: string) =>
+const settingsFor = (type: string, hideUsagePage = false) =>
 	mock<FrontendSettings>({
 		deployment: { type },
+		hideUsagePage,
 	});
 
 describe('useBasePageRedirectionHelper', () => {
@@ -89,11 +90,6 @@ describe('useBasePageRedirectionHelper', () => {
 	});
 
 	test.each([
-		[
-			'default',
-			ROLE.Owner,
-			'https://n8n.io/pricing?utm_campaign=upgrade-api&source=advanced-permissions',
-		],
 		[
 			'cloud',
 			ROLE.Owner,
@@ -146,6 +142,44 @@ describe('useBasePageRedirectionHelper', () => {
 			expect(location.href).toBe(expectation);
 		},
 	);
+
+	describe('self-hosted upgrade links', () => {
+		const originalBasePath = window.BASE_PATH;
+		const editionsUrl = 'https://docs.n8n.io/deploy/host-n8n/community-edition-features/';
+
+		afterEach(() => {
+			window.BASE_PATH = originalBasePath;
+		});
+
+		test('navigates to usage in the same tab under the configured base path', async () => {
+			settingsStore.setSettings(settingsFor('default'));
+			window.BASE_PATH = '/n8n/';
+			const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
+			await pageRedirectionHelper.goToUpgrade('advanced-permissions', 'upgrade-api');
+
+			expect(location.href).toBe('https://test.app.n8n.cloud/n8n/settings/usage');
+			expect(openSpy).not.toHaveBeenCalled();
+		});
+
+		test('opens edition documentation when the usage page is hidden', async () => {
+			settingsStore.setSettings(settingsFor('default', true));
+			const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
+			await pageRedirectionHelper.goToUpgrade('advanced-permissions', 'upgrade-api');
+
+			expect(openSpy).toHaveBeenCalledWith(editionsUrl, '_blank', 'noopener');
+			expect(location.href).toBe('https://test.app.n8n.cloud');
+		});
+
+		test('redirects to edition documentation when the usage page is hidden', async () => {
+			settingsStore.setSettings(settingsFor('default', true));
+
+			await pageRedirectionHelper.goToUpgrade('advanced-permissions', 'upgrade-api', 'redirect');
+
+			expect(location.href).toBe(editionsUrl);
+		});
+	});
 
 	describe('goToVersions', () => {
 		test('redirects in the same tab for cloud instance owners', async () => {

@@ -2,6 +2,7 @@
 import { useI18n } from '@n8n/i18n';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import { APP_MODALS_ELEMENT_ID } from '@/app/constants';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 import { I18nT } from 'vue-i18n';
 
 import { ElDialog } from 'element-plus';
@@ -15,6 +16,7 @@ const props = defineProps<Props>();
 const visible = defineModel<boolean>();
 const pageRedirectionHelper = usePageRedirectionHelper();
 const locale = useI18n();
+const settingsStore = useSettingsStore();
 
 const goToUpgrade = async () => {
 	await pageRedirectionHelper.goToUpgrade('rbac', 'upgrade-rbac');
@@ -24,12 +26,25 @@ const goToUpgrade = async () => {
 <template>
 	<ElDialog
 		v-model="visible"
-		:title="locale.baseText('projects.settings.role.upgrade.title')"
+		:title="
+			locale.baseText(
+				settingsStore.isCloudDeployment
+					? 'projects.settings.role.upgrade.title'
+					: 'projects.settings.role.license.project.title',
+			)
+		"
 		width="500"
 		:append-to="`#${APP_MODALS_ELEMENT_ID}`"
 	>
 		<div class="pt-l">
-			<I18nT keypath="projects.settings.role.upgrade.message" scope="global">
+			<I18nT
+				:keypath="
+					settingsStore.isCloudDeployment
+						? 'projects.settings.role.upgrade.message'
+						: 'projects.settings.role.license.project.message'
+				"
+				scope="global"
+			>
 				<template #planName>{{ props.planName }}</template>
 				<template #limit>
 					{{
@@ -47,7 +62,11 @@ const goToUpgrade = async () => {
 					locale.baseText('generic.cancel')
 				}}</N8nButton>
 				<N8nButton variant="solid" native-type="button" @click="goToUpgrade">{{
-					locale.baseText('projects.create.limitReached.link')
+					locale.baseText(
+						settingsStore.isCloudDeployment
+							? 'projects.create.limitReached.link'
+							: 'generic.licenseDetails',
+					)
 				}}</N8nButton>
 			</div>
 		</template>

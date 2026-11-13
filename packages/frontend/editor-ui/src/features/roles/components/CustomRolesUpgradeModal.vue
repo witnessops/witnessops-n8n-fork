@@ -5,9 +5,11 @@ import { useI18n } from '@n8n/i18n';
 import { I18nT } from 'vue-i18n';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import { APP_MODALS_ELEMENT_ID, CUSTOM_ROLES_DOCS_URL } from '@/app/constants';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 
 const visible = defineModel<boolean>();
 const i18n = useI18n();
+const settingsStore = useSettingsStore();
 const { goToUpgrade } = usePageRedirectionHelper();
 
 const onViewPlans = async () => {
@@ -19,13 +21,26 @@ const onViewPlans = async () => {
 <template>
 	<ElDialog
 		v-model="visible"
-		:title="i18n.baseText('projects.settings.role.upgrade.title')"
+		:title="
+			i18n.baseText(
+				settingsStore.isCloudDeployment
+					? 'projects.settings.role.upgrade.title'
+					: 'projects.settings.role.license.custom.title',
+			)
+		"
 		width="400"
 		:append-to="`#${APP_MODALS_ELEMENT_ID}`"
 	>
 		<div :class="$style.content">
 			<N8nText tag="p" size="medium">
-				<I18nT keypath="projects.settings.role.upgrade.custom.body" tag="span">
+				<I18nT
+					:keypath="
+						settingsStore.isCloudDeployment
+							? 'projects.settings.role.upgrade.custom.body'
+							: 'projects.settings.role.license.custom.body'
+					"
+					tag="span"
+				>
 					<template #documentation>
 						<N8nLink :href="CUSTOM_ROLES_DOCS_URL" :new-window="true">{{
 							i18n.baseText('generic.documentation')
@@ -40,9 +55,15 @@ const onViewPlans = async () => {
 					{{ i18n.baseText('generic.cancel') }}
 				</N8nButton>
 				<N8nButton variant="solid" @click="onViewPlans">
-					{{ i18n.baseText('projects.settings.role.upgrade.custom.viewPlans') }}
+					{{
+						i18n.baseText(
+							settingsStore.isCloudDeployment
+								? 'projects.settings.role.upgrade.custom.viewPlans'
+								: 'generic.licenseDetails',
+						)
+					}}
 					<template #append>
-						<span :class="$style.externalIcon">↗</span>
+						<span v-if="settingsStore.isCloudDeployment" :class="$style.externalIcon">↗</span>
 					</template>
 				</N8nButton>
 			</div>
