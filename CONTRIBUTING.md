@@ -1,5 +1,12 @@
 # Contributing to n8n
 
+> **WitnessOps fork:** This personal build does not accept external contributions
+> yet. The n8n CLA and team-review instructions below describe contributions to
+> `n8n-io/n8n`. They do not establish a WitnessOps agreement or reviewer approval.
+> Before accepting an external contribution here, define a fork-specific
+> contribution and review policy. The maintainer must review changes manually
+> before merge. The license files remain in force.
+
 Great that you are here and you want to contribute to n8n
 
 ## Contents

@@ -1,5 +1,9 @@
 # n8n OWNERS
 #
+# These teams and the Required Reviews status belong to n8n-io/n8n.
+# They do not establish reviewer approval for the WitnessOps fork.
+# See CONTRIBUTING.md before accepting an external fork contribution.
+#
 # Format: <pattern> <@org/team> [required]
 #
 # Examples:
@@ -8,9 +12,9 @@
 #
 # Last-match-wins: specific rules MUST come AFTER general rules.
 #
-# The `required` option makes team approval mandatory for non-test files: a
-# member of the team must approve the PR before merge. This is enforced by the
-# "Required Reviews" commit status (ci-owners-required-reviews.yml).
+# In n8n-io/n8n, the `required` option makes team approval mandatory for
+# non-test files. A team member must approve before merge. The "Required
+# Reviews" commit status (ci-owners-required-reviews.yml) enforces this there.
 # All other entries are advisory (reviewer recommendations and opt-in
 # reviewer auto-assignment).
 #
