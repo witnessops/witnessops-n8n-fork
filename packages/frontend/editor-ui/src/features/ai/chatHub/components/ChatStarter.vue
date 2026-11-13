@@ -136,10 +136,23 @@ function handleUpgradeClick() {
 
 				<N8nTooltip v-if="showInviteButton" :disabled="!isInviteDisabled">
 					<template #content>
-						<I18nT keypath="chatHub.welcome.inviteUpgrade.tooltip" scope="global">
+						<I18nT
+							:keypath="
+								settingsStore.isCloudDeployment
+									? 'chatHub.welcome.inviteUpgrade.tooltip'
+									: 'chatHub.welcome.inviteUpgrade.tooltip.selfHosted'
+							"
+							scope="global"
+						>
 							<template #link>
 								<N8nLink size="small" @click="handleUpgradeClick">
-									{{ i18n.baseText('generic.upgrade') }}
+									{{
+										i18n.baseText(
+											settingsStore.isCloudDeployment
+												? 'generic.upgrade'
+												: 'generic.licenseDetails',
+										)
+									}}
 								</N8nLink>
 							</template>
 							<template #docsLink>

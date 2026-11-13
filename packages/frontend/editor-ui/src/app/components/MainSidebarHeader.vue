@@ -8,7 +8,6 @@ import { I18nT } from 'vue-i18n';
 import { RouterLink, useRouter, type RouteLocationRaw } from 'vue-router';
 import {
 	N8nButton,
-	N8nLogo,
 	N8nTooltip,
 	N8nLink,
 	N8nIcon,
@@ -21,6 +20,7 @@ import { VIEWS } from '@/app/constants';
 import { useSourceControlStore } from '@/features/integrations/sourceControl.ee/sourceControl.store';
 import { PROTECTED_INSTANCE_DOCS_URL } from '@/features/integrations/sourceControl.ee/sourceControl.constants';
 import KeyboardShortcutTooltip from '@/app/components/KeyboardShortcutTooltip.vue';
+import WitnessOpsLogo from '@/app/components/WitnessOpsLogo.vue';
 import { useSettingsStore } from '@n8n/stores/settings.store';
 import { useGlobalEntityCreation } from '@/app/composables/useGlobalEntityCreation';
 defineProps<{
@@ -117,11 +117,7 @@ function handleLinkClick(event: MouseEvent) {
 		}"
 	>
 		<RouterLink v-if="!isCollapsed" :to="{ name: VIEWS.HOMEPAGE }" :class="$style.logo">
-			<N8nLogo
-				size="small"
-				:collapsed="isCollapsed"
-				:release-channel="settingsStore.settings.releaseChannel"
-			>
+			<WitnessOpsLogo size="small">
 				<N8nTooltip
 					v-if="sourceControlStore.preferences.branchReadOnly && !isCollapsed"
 					placement="bottom"
@@ -141,7 +137,7 @@ function handleLinkClick(event: MouseEvent) {
 						:class="$style.readOnlyEnvironmentIcon"
 					/>
 				</N8nTooltip>
-			</N8nLogo>
+			</WitnessOpsLogo>
 		</RouterLink>
 		<!-- Experiment cleanup (123_surface_mcp_to_claude_trial_users): map menu instead of claudeMenu. Remove the Claude leading icon and trackOpen. -->
 		<N8nDropdownMenu

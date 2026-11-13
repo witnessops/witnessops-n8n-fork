@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { N8nLogo } from '@n8n/design-system';
 import type { FormFieldValueUpdate, IFormBoxConfig } from '@/Interface';
-import { useSettingsStore } from '@n8n/stores/settings.store';
+import WitnessOpsLogo from '@/app/components/WitnessOpsLogo.vue';
 import type { EmailOrLdapLoginIdAndPassword } from './SigninView.vue';
 
 import { N8nFormBox, N8nText } from '@n8n/design-system';
@@ -36,15 +35,11 @@ const onSubmit = (data: unknown) => {
 const onSecondaryClick = () => {
 	emit('secondaryClick');
 };
-
-const {
-	settings: { releaseChannel },
-} = useSettingsStore();
 </script>
 
 <template>
 	<div :class="$style.container">
-		<N8nLogo size="large" :release-channel="releaseChannel" />
+		<WitnessOpsLogo size="large" />
 		<div v-if="subtitle" :class="$style.textContainer">
 			<N8nText size="large">{{ subtitle }}</N8nText>
 		</div>

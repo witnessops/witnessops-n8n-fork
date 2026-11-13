@@ -14,6 +14,8 @@ import { useUsersStore } from '@n8n/stores/users.store';
 import { getResourcePermissions } from '@n8n/permissions';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import { I18nT } from 'vue-i18n';
+import { useSettingsStore } from '@n8n/stores/settings.store';
+import { N8N_SELF_HOSTED_LICENSE_INFO_URL } from '@n8n/frontend-constants/urls';
 
 import {
 	N8nBadge,
@@ -36,6 +38,7 @@ const route = useRoute();
 const router = useRouter();
 const uiStore = useUIStore();
 const usersStore = useUsersStore();
+const settingsStore = useSettingsStore();
 const toast = useToast();
 const documentTitle = useDocumentTitle();
 const pageRedirectionHelper = usePageRedirectionHelper();
@@ -317,11 +320,23 @@ const openCommunityRegisterModal = () => {
 						locale.baseText('settings.usageAndPlan.button.manage')
 					}}</a>
 				</N8nButton>
-				<N8nButton v-else size="large" @click.prevent="onViewPlans">
+				<N8nButton
+					v-else-if="settingsStore.isCloudDeployment"
+					size="large"
+					@click.prevent="onViewPlans"
+				>
 					<a :href="viewPlansUrl" target="_blank">{{
 						locale.baseText('settings.usageAndPlan.button.plans')
 					}}</a>
 				</N8nButton>
+				<N8nButton
+					v-else
+					size="large"
+					:href="N8N_SELF_HOSTED_LICENSE_INFO_URL"
+					target="_blank"
+					@click="sendUsageTelemetry('view_license_options')"
+					>{{ locale.baseText('settings.usageAndPlan.button.licenseOptions') }}</N8nButton
+				>
 			</div>
 
 			<N8nDialog

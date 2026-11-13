@@ -328,14 +328,33 @@ function goToUpgrade() {
 			v-else
 			class="mt-2xl mb-l"
 			data-test-id="secrets-provider-connections-content-unlicensed"
-			:button-text="i18n.baseText('settings.externalSecrets.actionBox.buttonText')"
+			:button-text="
+				i18n.baseText(
+					settingsStore.isCloudDeployment
+						? 'settings.externalSecrets.actionBox.buttonText'
+						: 'generic.licenseDetails',
+				)
+			"
 			@click="goToUpgrade"
 		>
 			<template #heading>
-				<span>{{ i18n.baseText('settings.externalSecrets.actionBox.title') }}</span>
+				<span>{{
+					i18n.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.externalSecrets.actionBox.title'
+							: 'settings.externalSecrets.actionBox.license.title',
+					)
+				}}</span>
 			</template>
 			<template #description>
-				<I18nT keypath="settings.externalSecrets.actionBox.description" scope="global">
+				<I18nT
+					:keypath="
+						settingsStore.isCloudDeployment
+							? 'settings.externalSecrets.actionBox.description'
+							: 'settings.externalSecrets.actionBox.license.description'
+					"
+					scope="global"
+				>
 					<template #link>
 						<a :href="i18n.baseText('settings.externalSecrets.docs')" target="_blank">
 							{{ i18n.baseText('settings.externalSecrets.actionBox.description.link') }}

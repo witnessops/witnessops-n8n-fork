@@ -1451,7 +1451,11 @@ onBeforeUnmount(() => {
 								:class="[$style['upgrade-badge'], 'ml-4xs']"
 								@click="goToDataRedactionUpgrade"
 							>
-								{{ i18n.baseText('generic.upgrade') }}
+								{{
+									i18n.baseText(
+										settingsStore.isCloudDeployment ? 'generic.upgrade' : 'generic.licenseDetails',
+									)
+								}}
 							</N8nBadge>
 							<N8nTooltip placement="top">
 								<template #content>
@@ -1557,7 +1561,11 @@ onBeforeUnmount(() => {
 								:class="[$style['upgrade-badge'], 'ml-4xs']"
 								@click="goToDataRedactionUpgrade"
 							>
-								{{ i18n.baseText('generic.upgrade') }}
+								{{
+									i18n.baseText(
+										settingsStore.isCloudDeployment ? 'generic.upgrade' : 'generic.licenseDetails',
+									)
+								}}
 							</N8nBadge>
 							<N8nTooltip placement="top">
 								<template #content>

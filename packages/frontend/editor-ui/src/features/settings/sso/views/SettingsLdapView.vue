@@ -653,12 +653,30 @@ onMounted(async () => {
 			{{ i18n.baseText('settings.ldap.note') }}
 		</N8nInfoTip>
 		<N8nEmptyState
-			:description="i18n.baseText('settings.ldap.disabled.description')"
-			:button-text="i18n.baseText('settings.ldap.disabled.buttonText')"
+			:description="
+				i18n.baseText(
+					settingsStore.isCloudDeployment
+						? 'settings.ldap.disabled.description'
+						: 'settings.ldap.disabled.license.description',
+				)
+			"
+			:button-text="
+				i18n.baseText(
+					settingsStore.isCloudDeployment
+						? 'settings.ldap.disabled.buttonText'
+						: 'generic.licenseDetails',
+				)
+			"
 			@click:button="goToUpgrade"
 		>
 			<template #heading>
-				<span>{{ i18n.baseText('settings.ldap.disabled.title') }}</span>
+				<span>{{
+					i18n.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.ldap.disabled.title'
+							: 'settings.ldap.disabled.license.title',
+					)
+				}}</span>
 			</template>
 		</N8nEmptyState>
 	</div>

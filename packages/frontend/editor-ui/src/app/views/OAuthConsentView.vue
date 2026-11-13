@@ -12,7 +12,6 @@ import {
 	N8nCheckbox,
 	N8nHeading,
 	N8nIcon,
-	N8nLogo,
 	N8nNotice,
 	N8nText,
 	N8nTooltip,
@@ -21,6 +20,7 @@ import { MCP_SCOPE_GROUPS } from '@n8n/frontend-module-mcp';
 import { useToast } from '@n8n/composables/useToast';
 import { useTelemetry } from '@n8n/composables/useTelemetry';
 import ScopesSelector from '@/app/components/scopes/ScopesSelector.vue';
+import WitnessOpsLogo from '@/app/components/WitnessOpsLogo.vue';
 
 const consentStore = useConsentStore();
 
@@ -243,7 +243,7 @@ watch(
 					</span>
 				</span>
 				<div :class="$style.logo">
-					<N8nLogo size="small" :collapsed="true" release-channel="stable" />
+					<WitnessOpsLogo size="small" />
 				</div>
 			</header>
 			<!-- Success screen, show while waiting to be redirected back to client -->

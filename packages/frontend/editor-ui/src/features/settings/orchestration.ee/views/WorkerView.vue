@@ -23,15 +23,39 @@ const goToUpgrade = () => {
 		v-else
 		data-test-id="worker-view-unlicensed"
 		:class="$style.actionBox"
-		:description="i18n.baseText('workerList.actionBox.description')"
-		:button-text="i18n.baseText('workerList.actionBox.buttonText')"
+		:description="
+			i18n.baseText(
+				settingsStore.isCloudDeployment
+					? 'workerList.actionBox.description'
+					: 'workerList.actionBox.license.description',
+			)
+		"
+		:button-text="
+			i18n.baseText(
+				settingsStore.isCloudDeployment
+					? 'workerList.actionBox.buttonText'
+					: 'generic.licenseDetails',
+			)
+		"
 		@click:button="goToUpgrade"
 	>
 		<template #heading>
-			<span>{{ i18n.baseText('workerList.actionBox.title') }}</span>
+			<span>{{
+				i18n.baseText(
+					settingsStore.isCloudDeployment
+						? 'workerList.actionBox.title'
+						: 'workerList.actionBox.license.title',
+				)
+			}}</span>
 		</template>
 		<template #description>
-			{{ i18n.baseText('workerList.actionBox.description') }}
+			{{
+				i18n.baseText(
+					settingsStore.isCloudDeployment
+						? 'workerList.actionBox.description'
+						: 'workerList.actionBox.license.description',
+				)
+			}}
 			<a :href="i18n.baseText('workerList.docs.url')" target="_blank">
 				{{ i18n.baseText('workerList.actionBox.description.link') }}
 			</a>

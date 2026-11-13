@@ -36,8 +36,6 @@ const FLOOR_TO_LEGACY_KEY: Record<EnforcedFloor, 'non-manual' | 'all'> = {
 	all: 'all',
 };
 
-const TOOLTIP_KEY = 'settings.security.dataRedaction.unlicensed_tooltip';
-
 const props = defineProps<{
 	initialFloor: RedactionFloor;
 	managedByEnv: boolean;
@@ -48,6 +46,22 @@ const settingsStore = useSettingsStore();
 const i18n = useI18n();
 const { showToast, showError } = useToast();
 const pageRedirectionHelper = usePageRedirectionHelper();
+
+const tooltipKey = computed(() =>
+	settingsStore.isCloudDeployment
+		? 'settings.security.dataRedaction.unlicensed_tooltip'
+		: 'settings.security.dataRedaction.unlicensed_tooltip.selfHosted',
+);
+const unlicensedBadgeLabel = computed(() =>
+	i18n.baseText(settingsStore.isCloudDeployment ? 'generic.upgrade' : 'generic.licenseRequired'),
+);
+const unlicensedLinkLabel = computed(() =>
+	i18n.baseText(
+		settingsStore.isCloudDeployment
+			? 'settings.security.dataRedaction.unlicensed_tooltip.link'
+			: 'generic.licenseDetails',
+	),
+);
 
 const floor = ref<RedactionFloor>(props.initialFloor);
 const showEnableDialog = ref(false);
@@ -163,7 +177,7 @@ function goToUpgrade() {
 					<N8nText :bold="true">
 						{{ i18n.baseText('settings.security.dataRedaction.enforce.title') }}
 						<N8nBadge v-if="!isLicensed" class="ml-4xs">
-							{{ i18n.baseText('generic.upgrade') }}
+							{{ unlicensedBadgeLabel }}
 						</N8nBadge>
 					</N8nText>
 					<N8nText size="small" color="text-light">
@@ -195,12 +209,10 @@ function goToUpgrade() {
 									data-test-id="enable-redaction-enforcement"
 								/>
 								<template #content>
-									<I18nT :keypath="TOOLTIP_KEY" tag="span" scope="global">
+									<I18nT :keypath="tooltipKey" tag="span" scope="global">
 										<template #action>
 											<a @click="goToUpgrade">
-												{{
-													i18n.baseText('settings.security.dataRedaction.unlicensed_tooltip.link')
-												}}
+												{{ unlicensedLinkLabel }}
 											</a>
 										</template>
 									</I18nT>
@@ -216,7 +228,7 @@ function goToUpgrade() {
 					<N8nText :bold="true">
 						{{ i18n.baseText('settings.security.dataRedaction.scope.title') }}
 						<N8nBadge v-if="!isLicensed" class="ml-4xs">
-							{{ i18n.baseText('generic.upgrade') }}
+							{{ unlicensedBadgeLabel }}
 						</N8nBadge>
 					</N8nText>
 				</template>
@@ -240,12 +252,10 @@ function goToUpgrade() {
 									data-test-id="redaction-enforcement-scope-select"
 								/>
 								<template #content>
-									<I18nT :keypath="TOOLTIP_KEY" tag="span" scope="global">
+									<I18nT :keypath="tooltipKey" tag="span" scope="global">
 										<template #action>
 											<a @click="goToUpgrade">
-												{{
-													i18n.baseText('settings.security.dataRedaction.unlicensed_tooltip.link')
-												}}
+												{{ unlicensedLinkLabel }}
 											</a>
 										</template>
 									</I18nT>

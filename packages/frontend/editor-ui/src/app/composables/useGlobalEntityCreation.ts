@@ -663,11 +663,7 @@ export const useGlobalEntityCreation = () => {
 			return i18n.baseText('generic.upgrade');
 		}
 
-		if (!projectsStore.isTeamProjectFeatureEnabled) {
-			return i18n.baseText('generic.enterprise');
-		}
-
-		return i18n.baseText('generic.upgrade');
+		return i18n.baseText('generic.licenseDetails');
 	});
 
 	return {

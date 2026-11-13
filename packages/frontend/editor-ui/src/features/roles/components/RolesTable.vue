@@ -91,10 +91,18 @@ function resolveCountRoute(row: RoleRow): RouteLocationRaw {
 				</div>
 				<div :class="$style.paywallText">
 					<N8nText tag="p" size="medium" :bold="true" align="center">
-						{{ i18n.baseText('roles.paywall.title') }}
+						{{
+							settingsStore.isCloudDeployment
+								? i18n.baseText('roles.paywall.title')
+								: i18n.baseText('generic.licenseRequired')
+						}}
 					</N8nText>
 					<N8nText tag="p" color="text-light" align="center">
-						{{ i18n.baseText('roles.paywall.description') }}
+						{{
+							settingsStore.isCloudDeployment
+								? i18n.baseText('roles.paywall.description')
+								: i18n.baseText('roles.paywall.selfHosted.description')
+						}}
 					</N8nText>
 				</div>
 				<div :class="$style.paywallActions">
@@ -110,7 +118,7 @@ function resolveCountRoute(row: RoleRow): RouteLocationRaw {
 						{{
 							settingsStore.isCloudDeployment
 								? i18n.baseText('roles.paywall.viewPlans')
-								: i18n.baseText('generic.upgrade')
+								: i18n.baseText('generic.licenseDetails')
 						}}
 					</N8nButton>
 				</div>

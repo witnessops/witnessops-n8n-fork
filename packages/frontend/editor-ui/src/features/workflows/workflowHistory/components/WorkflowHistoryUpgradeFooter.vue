@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { I18nT } from 'vue-i18n';
 import { useI18n } from '@n8n/i18n';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 
 const props = withDefaults(
 	defineProps<{
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const i18n = useI18n();
+const settingsStore = useSettingsStore();
 </script>
 
 <template>
@@ -24,10 +26,22 @@ const i18n = useI18n();
 		<span data-test-id="prune-time-display">
 			{{ props.pruneTimeDisplay }}
 		</span>
-		<I18nT keypath="workflowHistory.upgrade" tag="span" scope="global">
+		<I18nT
+			:keypath="
+				settingsStore.isCloudDeployment ? 'workflowHistory.upgrade' : 'workflowHistory.license'
+			"
+			tag="span"
+			scope="global"
+		>
 			<template #link>
 				<a href="#" @click.prevent="emit('upgrade')">
-					{{ i18n.baseText('workflowHistory.upgrade.link') }}
+					{{
+						i18n.baseText(
+							settingsStore.isCloudDeployment
+								? 'workflowHistory.upgrade.link'
+								: 'generic.licenseDetails',
+						)
+					}}
 				</a>
 			</template>
 		</I18nT>

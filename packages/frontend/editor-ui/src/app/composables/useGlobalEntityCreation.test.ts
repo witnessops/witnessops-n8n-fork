@@ -449,14 +449,14 @@ describe('useGlobalEntityCreation', () => {
 		expect(upgradeLabel.value).toBe('Upgrade');
 
 		settingsStore.isCloudDeployment = false;
-		expect(projectsLimitReachedMessage.value).toContain('You have reached the  plan limit of');
-		expect(upgradeLabel.value).toBe('Upgrade');
+		expect(projectsLimitReachedMessage.value).toContain('Your license allows 10 projects.');
+		expect(upgradeLabel.value).toBe('License details');
 
 		projectsStore.isTeamProjectFeatureEnabled = false;
 		expect(projectsLimitReachedMessage.value).toContain(
-			'Upgrade to unlock projects for more granular control over sharing, access and organisation of workflows',
+			'Your current license does not include team projects.',
 		);
-		expect(upgradeLabel.value).toBe('Enterprise');
+		expect(upgradeLabel.value).toBe('License details');
 	});
 
 	it('should display properly for readOnlyEnvironment', () => {

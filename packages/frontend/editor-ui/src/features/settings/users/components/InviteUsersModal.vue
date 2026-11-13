@@ -360,10 +360,21 @@ onMounted(() => {
 		<N8nDialogBody>
 			<div :data-test-id="`${INVITE_USER_MODAL_KEY}-modal`">
 				<N8nNotice v-if="!isAdvancedPermissionsEnabled">
-					<I18nT keypath="settings.users.advancedPermissions.warning" scope="global">
+					<I18nT
+						:keypath="
+							settingsStore.isCloudDeployment
+								? 'settings.users.advancedPermissions.warning'
+								: 'settings.users.advancedPermissions.warning.selfHosted'
+						"
+						scope="global"
+					>
 						<template #link>
 							<N8nLink size="small" @click="goToUpgradeAdvancedPermissions">
-								{{ i18n.baseText('generic.upgrade') }}
+								{{
+									i18n.baseText(
+										settingsStore.isCloudDeployment ? 'generic.upgrade' : 'generic.licenseDetails',
+									)
+								}}
 							</N8nLink>
 						</template>
 					</I18nT>

@@ -7,6 +7,7 @@ import StepHeader from '../shared/StepHeader.vue';
 import { useRouter } from 'vue-router';
 import { useUsageStore } from '@/features/settings/usage/usage.store';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 import { I18nT } from 'vue-i18n';
 
 import { N8nButton, N8nCallout, N8nText } from '@n8n/design-system';
@@ -25,6 +26,7 @@ const evaluationStore = useEvaluationStore();
 const nodeTypesStore = useNodeTypesStore();
 const evaluationState = useWorkflowEvaluationState();
 const usageStore = useUsageStore();
+const settingsStore = useSettingsStore();
 const pageRedirectionHelper = usePageRedirectionHelper();
 
 const hasRuns = computed(() => {
@@ -190,7 +192,13 @@ function onSeePlans() {
 						</li>
 					</ul>
 					<N8nCallout v-else theme="warning" iconless>
-						{{ locale.baseText('evaluations.setupWizard.limitReached') }}
+						{{
+							locale.baseText(
+								settingsStore.isCloudDeployment
+									? 'evaluations.setupWizard.limitReached'
+									: 'evaluations.setupWizard.limitReached.selfHosted',
+							)
+						}}
 					</N8nCallout>
 					<div :class="$style.actionButton">
 						<N8nButton
@@ -202,7 +210,11 @@ function onSeePlans() {
 							{{ locale.baseText('evaluations.setupWizard.step3.button') }}
 						</N8nButton>
 						<N8nButton v-else size="small" @click="onSeePlans">
-							{{ locale.baseText('generic.seePlans') }}
+							{{
+								locale.baseText(
+									settingsStore.isCloudDeployment ? 'generic.seePlans' : 'generic.licenseDetails',
+								)
+							}}
 						</N8nButton>
 						<N8nButton
 							variant="ghost"
@@ -218,10 +230,23 @@ function onSeePlans() {
 						:class="$style.quotaNote"
 					>
 						<N8nText size="xsmall" color="text-base">
-							<I18nT keypath="evaluations.setupWizard.step3.notice" scope="global">
+							<I18nT
+								:keypath="
+									settingsStore.isCloudDeployment
+										? 'evaluations.setupWizard.step3.notice'
+										: 'evaluations.setupWizard.step3.notice.selfHosted'
+								"
+								scope="global"
+							>
 								<template #link>
 									<a style="text-decoration: underline; color: inherit" @click="onSeePlans"
-										>{{ locale.baseText('evaluations.setupWizard.step3.notice.link') }}
+										>{{
+											locale.baseText(
+												settingsStore.isCloudDeployment
+													? 'evaluations.setupWizard.step3.notice.link'
+													: 'generic.licenseDetails',
+											)
+										}}
 									</a>
 								</template>
 							</I18nT>

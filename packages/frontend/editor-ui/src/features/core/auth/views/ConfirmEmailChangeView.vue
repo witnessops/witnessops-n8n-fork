@@ -2,18 +2,15 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { N8nButton, N8nHeading, N8nLogo, N8nText } from '@n8n/design-system';
+import { N8nButton, N8nHeading, N8nText } from '@n8n/design-system';
 import { useI18n } from '@n8n/i18n';
 import { useToast } from '@n8n/composables/useToast';
-import { useSettingsStore } from '@n8n/stores/settings.store';
 import { useUsersStore } from '@n8n/stores/users.store';
 
 import { VIEWS } from '@/app/constants';
+import WitnessOpsLogo from '@/app/components/WitnessOpsLogo.vue';
 
 const usersStore = useUsersStore();
-const {
-	settings: { releaseChannel },
-} = useSettingsStore();
 
 const locale = useI18n();
 const toast = useToast();
@@ -79,7 +76,7 @@ onMounted(async () => {
 
 <template>
 	<div :class="$style.container">
-		<N8nLogo size="large" :release-channel="releaseChannel" />
+		<WitnessOpsLogo size="large" />
 		<div v-if="ready" :class="$style.card" data-test-id="confirm-email-change">
 			<N8nHeading size="xlarge">{{ locale.baseText('auth.confirmEmailChange.title') }}</N8nHeading>
 			<N8nText color="text-base">

@@ -2,8 +2,10 @@
 import { useI18n } from '@n8n/i18n';
 import { N8nEmptyState, N8nInfoTip } from '@n8n/design-system';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 
 const i18n = useI18n();
+const settingsStore = useSettingsStore();
 const pageRedirectHelper = usePageRedirectionHelper();
 
 function goToUpgrade() {
@@ -20,12 +22,32 @@ function goToUpgrade() {
 		</div>
 		<div data-test-id="action-box-unlicensed">
 			<N8nEmptyState
-				:description="i18n.baseText('settings.log-streaming.actionBox.description')"
-				:button-text="i18n.baseText('settings.log-streaming.actionBox.button')"
+				:description="
+					i18n.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.log-streaming.actionBox.description'
+							: 'settings.log-streaming.actionBox.license.description',
+					)
+				"
+				:button-text="
+					i18n.baseText(
+						settingsStore.isCloudDeployment
+							? 'settings.log-streaming.actionBox.button'
+							: 'generic.licenseDetails',
+					)
+				"
 				@click:button="goToUpgrade"
 			>
 				<template #heading>
-					<span v-n8n-html="i18n.baseText('settings.log-streaming.actionBox.title')" />
+					<span
+						v-n8n-html="
+							i18n.baseText(
+								settingsStore.isCloudDeployment
+									? 'settings.log-streaming.actionBox.title'
+									: 'settings.log-streaming.actionBox.license.title',
+							)
+						"
+					/>
 				</template>
 			</N8nEmptyState>
 		</div>

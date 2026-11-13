@@ -12,6 +12,7 @@ import type { IUser } from '@n8n/rest-api-client/api/users';
 import { useToast } from '@n8n/composables/useToast';
 import { waitFor } from '@testing-library/vue';
 import { useRBACStore } from '@n8n/stores/rbac.store';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 
 vi.mock('@n8n/composables/useToast', () => ({
 	useToast: vi.fn(),
@@ -50,6 +51,7 @@ let usageStore: ReturnType<typeof mockedStore<typeof useUsageStore>>;
 let uiStore: ReturnType<typeof mockedStore<typeof useUIStore>>;
 let usersStore: ReturnType<typeof mockedStore<typeof useUsersStore>>;
 let rbacStore: ReturnType<typeof mockedStore<typeof useRBACStore>>;
+let settingsStore: ReturnType<typeof mockedStore<typeof useSettingsStore>>;
 let mockToast: ReturnType<typeof useToast>;
 
 const pinia = createTestingPinia({ stubActions: false });
@@ -66,6 +68,8 @@ describe('SettingsUsageAndPlan', () => {
 		uiStore = mockedStore(useUIStore);
 		usersStore = mockedStore(useUsersStore);
 		rbacStore = mockedStore(useRBACStore);
+		settingsStore = mockedStore(useSettingsStore);
+		settingsStore.settings.deployment = { type: 'default' };
 
 		rbacStore.setGlobalScopes([]);
 
@@ -77,6 +81,7 @@ describe('SettingsUsageAndPlan', () => {
 
 		usageStore.viewPlansUrl = 'https://subscription.n8n.io';
 		usageStore.managePlanUrl = 'https://subscription.n8n.io';
+		usageStore.managementToken = undefined;
 		usageStore.isLoading = false;
 		usageStore.setLoading = vi.fn((value: boolean) => {
 			usageStore.isLoading = value;
@@ -102,6 +107,29 @@ describe('SettingsUsageAndPlan', () => {
 		expect(getByRole('heading').nextElementSibling).toBeNull();
 	});
 
+	it('should link to license options on self-hosted instances without a management token', () => {
+		const { getByRole, queryByRole } = renderComponent();
+
+		const licenseOptions = getByRole('link', { name: 'License options' });
+		expect(licenseOptions).toHaveAttribute(
+			'href',
+			'https://docs.n8n.io/deploy/host-n8n/community-edition-features/',
+		);
+		expect(licenseOptions).toHaveAttribute('rel', expect.stringContaining('noopener'));
+		expect(queryByRole('link', { name: 'View plans' })).not.toBeInTheDocument();
+	});
+
+	it('should retain the plan link on Cloud instances', () => {
+		settingsStore.settings.deployment = { type: 'cloud' };
+		const { getByRole, queryByRole } = renderComponent();
+
+		expect(getByRole('link', { name: 'View plans' })).toHaveAttribute(
+			'href',
+			expect.stringContaining('https://subscription.n8n.io'),
+		);
+		expect(queryByRole('link', { name: 'License options' })).not.toBeInTheDocument();
+	});
+
 	it('should not show badge but unlock notice', async () => {
 		usageStore.isLoading = false;
 		usageStore.planName = 'Community';
@@ -112,9 +140,9 @@ describe('SettingsUsageAndPlan', () => {
 		expect(getByRole('heading', { level: 3 })).toHaveTextContent('Community');
 		expect(container.querySelector('.n8n-badge')).toBeNull();
 
-		expect(getByRole('button', { name: 'Unlock' })).toBeVisible();
+		expect(getByRole('button', { name: 'Register' })).toBeVisible();
 
-		await userEvent.click(getByRole('button', { name: 'Unlock' }));
+		await userEvent.click(getByRole('button', { name: 'Register' }));
 		expect(uiStore.openModalWithData).toHaveBeenCalledWith(
 			expect.objectContaining({ name: COMMUNITY_PLUS_ENROLLMENT_MODAL }),
 		);

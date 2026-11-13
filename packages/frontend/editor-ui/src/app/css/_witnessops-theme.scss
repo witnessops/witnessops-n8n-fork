@@ -1,0 +1,145 @@
+/* Base this fork palette on WitnessOps web tokens. Fill intermediate neutral steps for n8n. */
+$latin-ext: 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF';
+$latin: 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
+
+@mixin font-face($family, $file, $weight, $range) {
+	@font-face {
+		font-family: $family;
+		src: url('./fonts/witnessops/#{$file}.woff2') format('woff2');
+		font-style: normal;
+		font-weight: $weight;
+		font-display: swap;
+		unicode-range: #{$range};
+	}
+}
+
+@include font-face('WitnessOps Inter', 'inter-400-latin-ext', 400, $latin-ext);
+@include font-face('WitnessOps Inter', 'inter-400', 400, $latin);
+@include font-face('WitnessOps Inter', 'inter-500-latin-ext', 500, $latin-ext);
+@include font-face('WitnessOps Inter', 'inter-500', 500, $latin);
+@include font-face('WitnessOps Inter', 'inter-600-latin-ext', 600, $latin-ext);
+@include font-face('WitnessOps Inter', 'inter-600', 600, $latin);
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-400-box', 400, 'U+2500');
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-400-latin-ext', 400, $latin-ext);
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-400', 400, $latin);
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-500-box', 500, 'U+2500');
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-500-latin-ext', 500, $latin-ext);
+@include font-face('WitnessOps Plex Mono', 'ibm-plex-mono-500', 500, $latin);
+
+@mixin witnessops-light {
+	--background--brand: #6c5631;
+	--background--brand--hover: #5a4825;
+	--background--brand--active: #4a3b1c;
+	--background--brand--focus: #6c5631;
+	--background--surface: #fcfaf4;
+	--background--subtle: #efe9da;
+	--border-color: #ddd3bb;
+	--border-color--subtle: #e3d9bf;
+	--border-color--strong: #7a7258;
+	--text-color: #0b0c0b;
+	--text-color--subtle: #38362f;
+	--text-color--subtler: #55524a;
+	--icon-color: #55524a;
+	--icon-color--strong: #0b0c0b;
+	--focus--border-color: #6c5631;
+	--color--background: #f5f1e8;
+	--color--background--light-1: #efe9da;
+	--color--background--light-2: #f7f3e9;
+	--color--background--light-3: #fcfaf4;
+	--color--secondary: #6c5631;
+	--color--secondary--shade-1: #5a4825;
+	--link--color--secondary: #6c5631;
+	--link--color--secondary--hover: #5a4825;
+	--button--color--text--primary: #f5f1e8;
+	--button--border-color--primary--hover-active: #5a4825;
+	--button--color--background--primary--hover-active-focus: #5a4825;
+	--button--color--text--secondary--hover-active-focus: #6c5631;
+	--button--border-color--secondary--hover-active-focus: #6c5631;
+	--node-creator--button--color--text--hover: #6c5631;
+	--node-creator--button--border-color--hover: #6c5631;
+	--icon--color--hover: #6c5631;
+	--canvas--color--background: #ede7d7;
+	--canvas--dot--color: #c9b687;
+	--node--color--background: #fcfaf4;
+	--node--border-color--running: #6c5631;
+}
+
+@mixin witnessops-dark {
+	--background--brand: #b89b62;
+	--background--brand--hover: #cbb27d;
+	--background--brand--active: #a68b57;
+	--background--brand--focus: #cbb27d;
+	--background--surface: #121310;
+	--background--subtle: #1a1b17;
+	--border-color: #2f302b;
+	--border-color--subtle: #2f302b;
+	--border-color--strong: #6f6e64;
+	--text-color: #f5f1e8;
+	--text-color--subtle: #c3bfb6;
+	--text-color--subtler: #a7a399;
+	--icon-color: #a7a399;
+	--icon-color--strong: #f5f1e8;
+	--focus--border-color: #b89b62;
+	--color--background: #0b0c0b;
+	--color--background--light-1: #121310;
+	--color--background--light-2: #0f100e;
+	--color--background--light-3: #121310;
+	--color--secondary: #b89b62;
+	--color--secondary--shade-1: #cbb27d;
+	--link--color--secondary: #cbb27d;
+	--link--color--secondary--hover: #f5f1e8;
+	--button--color--text--primary: #0b0c0b;
+	--button--border-color--primary--hover-active: #cbb27d;
+	--button--color--background--primary--hover-active-focus: #cbb27d;
+	--button--color--text--secondary--hover-active-focus: #cbb27d;
+	--button--border-color--secondary--hover-active-focus: #cbb27d;
+	--node-creator--button--color--text--hover: #cbb27d;
+	--node-creator--button--border-color--hover: #cbb27d;
+	--icon--color--hover: #cbb27d;
+	--canvas--color--background: #0f100e;
+	--canvas--dot--color: #4c432d;
+	--node--color--background: #121310;
+	--node--border-color--running: #b89b62;
+}
+
+:root {
+	/* The warm neutral scale reaches components that still use primitive colors. */
+	--font-family:
+		'WitnessOps Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--font-family--monospace:
+		'WitnessOps Plex Mono', 'Geist Mono', ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono',
+		monospace;
+	--color--neutral-white: #fcfaf4;
+	--color--neutral-50: #faf7ef;
+	--color--neutral-100: #f5f1e8;
+	--color--neutral-125: #f1ecdf;
+	--color--neutral-150: #efe9da;
+	--color--neutral-200: #e9e0cd;
+	--color--neutral-250: #ddd3bb;
+	--color--neutral-300: #c3bfb6;
+	--color--neutral-400: #a7a399;
+	--color--neutral-500: #7a7258;
+	--color--neutral-600: #55524a;
+	--color--neutral-700: #38362f;
+	--color--neutral-750: #33342f;
+	--color--neutral-800: #2f302b;
+	--color--neutral-850: #1a1b17;
+	--color--neutral-900: #121310;
+	--color--neutral-950: #0b0c0b;
+	--color--neutral-black: #0b0c0b;
+	@include witnessops-light;
+}
+
+body[data-theme='light'] {
+	@include witnessops-light;
+}
+
+body[data-theme='dark'] {
+	@include witnessops-dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	body:not([data-theme]) {
+		@include witnessops-dark;
+	}
+}

@@ -964,31 +964,31 @@ describe('NodeView', () => {
 	});
 
 	describe('Canvas-only mode', () => {
-		it('shows the n8n logo on the canvas when canvas-only mode is enabled', async () => {
+		it('shows the WitnessOps logo on the canvas when canvas-only mode is enabled', async () => {
 			useSettingsStore().settings.canvasOnly = true;
 
 			const { findByTestId } = renderNodeView();
 
-			expect(await findByTestId('n8n-logo')).toBeInTheDocument();
+			expect(await findByTestId('witnessops-logo')).toBeInTheDocument();
 		});
 
-		it('does not show the n8n logo on the canvas when canvas-only mode is disabled', async () => {
+		it('does not show the WitnessOps logo on the canvas when canvas-only mode is disabled', async () => {
 			useSettingsStore().settings.canvasOnly = false;
 
 			const { findByTestId, queryByTestId } = renderNodeView();
 
 			await findByTestId('canvas-stub-copy');
-			expect(queryByTestId('n8n-logo')).not.toBeInTheDocument();
+			expect(queryByTestId('witnessops-logo')).not.toBeInTheDocument();
 		});
 
-		it('does not show the n8n logo in a workflow preview', async () => {
+		it('does not show the WitnessOps logo in a workflow preview', async () => {
 			routeMock.name = VIEWS.DEMO;
 			useSettingsStore().settings.canvasOnly = true;
 
 			const { findByTestId, queryByTestId } = renderNodeView();
 
 			await findByTestId('canvas-stub-copy');
-			expect(queryByTestId('n8n-logo')).not.toBeInTheDocument();
+			expect(queryByTestId('witnessops-logo')).not.toBeInTheDocument();
 		});
 	});
 

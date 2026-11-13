@@ -3,6 +3,7 @@ import { useDocumentTitle } from '@/app/composables/useDocumentTitle';
 import { usePageRedirectionHelper } from '@/app/composables/usePageRedirectionHelper';
 import { useSSOStore, SupportedProtocols, type SupportedProtocolType } from '../sso.store';
 import { useI18n } from '@n8n/i18n';
+import { useSettingsStore } from '@n8n/stores/settings.store';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { onBeforeRouteLeave, type NavigationGuardNext } from 'vue-router';
 import {
@@ -27,6 +28,7 @@ const ssoStore = useSSOStore();
 const provisioningStore = useUserRoleProvisioningStore();
 const documentTitle = useDocumentTitle();
 const pageRedirectionHelper = usePageRedirectionHelper();
+const settingsStore = useSettingsStore();
 
 const isRulesMappingInN8n = computed(
 	() => provisioningStore.provisioningConfig?.scopesUseExpressionMapping ?? false,
@@ -47,7 +49,7 @@ const options = computed(() => {
 		{
 			label: ssoStore.isEnterpriseOidcEnabled
 				? SupportedProtocols.OIDC.toUpperCase()
-				: `${SupportedProtocols.OIDC.toUpperCase()} (${i18n.baseText('generic.upgradeToEnterprise')})`,
+				: `${SupportedProtocols.OIDC.toUpperCase()} (${i18n.baseText(settingsStore.isCloudDeployment ? 'generic.upgradeToEnterprise' : 'generic.licenseRequired')})`,
 			value: SupportedProtocols.OIDC,
 		},
 	];
@@ -181,11 +183,19 @@ onMounted(() => {
 			data-test-id="sso-content-unlicensed"
 			:class="$style.actionBox"
 			:description="i18n.baseText('settings.sso.actionBox.description')"
-			:button-text="i18n.baseText('settings.sso.actionBox.buttonText')"
+			:button-text="
+				settingsStore.isCloudDeployment
+					? i18n.baseText('settings.sso.actionBox.buttonText')
+					: i18n.baseText('generic.licenseDetails')
+			"
 			@click:button="goToUpgrade"
 		>
 			<template #heading>
-				<span>{{ i18n.baseText('settings.sso.actionBox.title') }}</span>
+				<span>{{
+					settingsStore.isCloudDeployment
+						? i18n.baseText('settings.sso.actionBox.title')
+						: i18n.baseText('generic.licenseRequired')
+				}}</span>
 			</template>
 		</N8nEmptyState>
 
