@@ -23,7 +23,9 @@ jobs:
     # Skipped for:
     #  - PRs from forks (no token to comment with)
     #  - Bot-authored PRs (Dependabot, etc. — noise, not useful)
+    # The App and OWNERS teams belong to n8n's upstream repository.
     if: |
+      github.repository == 'n8n-io/n8n' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest

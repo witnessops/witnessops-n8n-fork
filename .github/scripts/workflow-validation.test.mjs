@@ -140,6 +140,120 @@ describe('evaluateStepCondition', () => {
 	});
 });
 
+describe('upstream reviewer integrations', () => {
+	for (const [file, jobName, eventTypes] of [
+		['ci-owners-assign-reviewers.yml', 'assign-reviewers', ['labeled', 'synchronize', 'reopened']],
+		[
+			'ci-owners-review-recommendations.yml',
+			'recommend-reviewers',
+			['opened', 'synchronize', 'reopened'],
+		],
+	]) {
+		it(`${jobName} uses the upstream App only for upstream PR events`, () => {
+			const workflow = workflowFile(file);
+			const triggers = triggersOf(workflow);
+			assert.deepEqual(Object.keys(triggers), ['pull_request']);
+			assert.deepEqual(triggers.pull_request.types, eventTypes);
+			assert.deepEqual(triggers.pull_request.branches, ['master']);
+
+			const job = workflow.jobs[jobName];
+			const condition = job.if.trim();
+			const guard = condition.match(/^github\.repository == '([^']+)' &&/);
+			assert.ok(guard, 'repository guard must run before token creation');
+			assert.equal(guard[1], 'n8n-io/n8n');
+			assert.match(condition, /head\.repo\.full_name == github\.repository/);
+			assert.match(condition, /user\.type != 'Bot'/);
+			if (jobName === 'assign-reviewers') {
+				assert.match(condition, /n8n-cat-bot\[bot\]/);
+			}
+			assert.deepEqual(job.permissions, { contents: 'read', 'pull-requests': 'write' });
+			assert.equal(job.steps[0].name, 'Generate App Token');
+			const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+			assert.ok(checkout);
+			assert.equal(checkout.with['sparse-checkout'], '.github');
+			assert.equal(checkout.with.ref, undefined);
+
+			const runsFor = ({ repository, event, action, headRepository, userType, userLogin }) =>
+				event === 'pull_request' &&
+				eventTypes.includes(action) &&
+				repository === guard[1] &&
+				headRepository === repository &&
+				(userType !== 'Bot' ||
+					(jobName === 'assign-reviewers' && userLogin === 'n8n-cat-bot[bot]'));
+			const upstream = {
+				repository: 'n8n-io/n8n',
+				event: 'pull_request',
+				action: 'synchronize',
+				headRepository: 'n8n-io/n8n',
+				userType: 'User',
+				userLogin: 'maintainer',
+			};
+			assert.equal(runsFor(upstream), true);
+			assert.equal(
+				runsFor({
+					...upstream,
+					repository: 'witnessops/witnessops-n8n-fork',
+					headRepository: 'witnessops/witnessops-n8n-fork',
+				}),
+				false,
+			);
+			assert.equal(runsFor({ ...upstream, headRepository: 'contributor/n8n' }), false);
+			assert.equal(runsFor({ ...upstream, event: 'pull_request_target' }), false);
+			assert.equal(runsFor({ ...upstream, userType: 'Bot' }), false);
+			assert.equal(
+				runsFor({ ...upstream, userType: 'Bot', userLogin: 'n8n-cat-bot[bot]' }),
+				jobName === 'assign-reviewers',
+			);
+		});
+	}
+});
+
+describe('upstream contributor policy integrations', () => {
+	for (const [file, jobName, event] of [
+		['ci-cla-check.yml', 'cla-check', 'pull_request_target'],
+		['ci-owners-required-reviews.yml', 'required-reviews', 'pull_request_target'],
+		['ci-owners-required-reviews.yml', 'pass-in-merge-queue', 'merge_group'],
+	]) {
+		it(`${jobName} keeps the upstream policy in the upstream repository`, () => {
+			const workflow = workflowFile(file);
+			const triggers = triggersOf(workflow);
+			assert.ok(event in triggers);
+
+			const condition = workflow.jobs[jobName].if.trim();
+			const guard = condition.match(/^github\.repository == '([^']+)' &&/);
+			assert.ok(guard, 'repository guard must run before token creation');
+			assert.equal(guard[1], 'n8n-io/n8n');
+			const runsOn = (repository, eventName) => repository === guard[1] && eventName in triggers;
+			assert.equal(runsOn('n8n-io/n8n', event), true);
+			assert.equal(runsOn('witnessops/witnessops-n8n-fork', event), false);
+			if (jobName === 'cla-check') {
+				assert.match(workflow.jobs[jobName].steps[0].uses, /^n8n-io\/github-actions\/cla-check@/);
+			} else {
+				assert.equal(workflow.jobs[jobName].steps[0].name, 'Generate App Token');
+			}
+		});
+	}
+
+	it('keeps the trusted checkout and the CLA comment filter', () => {
+		const reviews = workflowFile('ci-owners-required-reviews.yml');
+		const checkout = reviews.jobs['required-reviews'].steps.find((step) =>
+			step.uses?.startsWith('actions/checkout@'),
+		);
+		assert.equal(checkout.with.ref, 'master');
+		assert.equal(checkout.with['persist-credentials'], false);
+
+		const cla = workflowFile('ci-cla-check.yml');
+		assert.match(
+			cla.jobs['cla-check'].if,
+			/startsWith\(github\.event\.comment\.body, '\/cla-check'\)/,
+		);
+		assert.equal(
+			cla.jobs['cla-check'].steps.some((step) => step.uses?.startsWith('actions/checkout@')),
+			false,
+		);
+	});
+});
+
 describe('automated release PR CI bypass', () => {
 	const releasePrConjunction = [
 		"github.event.pull_request.user.login == 'n8n-assistant[bot]'",

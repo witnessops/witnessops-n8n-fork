@@ -8,7 +8,7 @@ run-name: "${{ github.event_name == 'workflow_dispatch' && format('CI: Owners Re
 # Replaces the GitHub-native CODEOWNERS enforcement, which could not express
 # team ownership metadata beyond "request a review".
 #
-# Every PR is evaluated, whatever its base branch and whether or not its head
+# Every upstream PR is evaluated, whatever its base branch and whether its head
 # is a fork. Two PR classes make this necessary: GitHub applies the ruleset of
 # a stack's target branch to every PR in the stack, so a PR into a feature
 # branch can be gated by the master ruleset; and a fork PR cannot write the
@@ -83,7 +83,8 @@ jobs:
   # status to be green on the PR head, and queueing does not change approvals.
   pass-in-merge-queue:
     name: Pass in merge queue
-    if: github.event_name == 'merge_group'
+    # The inherited OWNERS teams belong to n8n's upstream repository.
+    if: github.repository == 'n8n-io/n8n' && github.event_name == 'merge_group'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -118,6 +119,7 @@ jobs:
     # come in through pull_request_review, fork heads through the workflow_run
     # of the review workflow.
     if: >-
+      github.repository == 'n8n-io/n8n' &&
       github.event_name != 'merge_group' &&
       (github.event_name != 'pull_request_target' ||
        github.event.action != 'edited' || github.event.changes.base) &&
