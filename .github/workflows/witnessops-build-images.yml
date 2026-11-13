@@ -1,0 +1,138 @@
+name: 'WitnessOps: Build fork images locally'
+
+# This workflow has no automatic trigger and no registry publishing path.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'witnessops/witnessops-n8n-fork'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      NODE_OPTIONS: '--max-old-space-size=7168'
+    steps:
+      - name: Check out the selected commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check source versions and tool pins
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          version="$(node -p 'require("./package.json").version')"
+          test "$version" = "$(node -p 'require("./packages/cli/package.json").version')"
+          test "$version" = "$(node -p 'require("./packages/@n8n/task-runner/package.json").version')"
+          node_version="$(sed -nE 's/^variable "NODE_VERSION" \{ default = "([^"]+)" \}$/\1/p' docker/docker-bake.hcl)"
+          test -n "$node_version"
+          pnpm_version="$(node -p 'require("./package.json").packageManager.split("@")[1]')"
+          test -n "$pnpm_version"
+          {
+            echo "version=$version"
+            echo "tag=${version}-${GITHUB_SHA}"
+            echo "node_version=$node_version"
+            echo "pnpm_version=$pnpm_version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up pinned pnpm
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          install: false
+          version: ${{ steps.source.outputs.pnpm_version }}
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: ${{ steps.source.outputs.node_version }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pinned dependencies
+        run: pnpm install --frozen-lockfile --trust-lockfile
+
+      - name: Build n8n and task runner inputs
+        env:
+          RELEASE: ${{ steps.source.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! pnpm build:n8n > "$RUNNER_TEMP/witnessops-build.log" 2>&1; then
+            tail -n 80 "$RUNNER_TEMP/witnessops-build.log"
+            exit 1
+          fi
+
+      - name: Set up local Docker builder
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Build and inspect local fork images
+        env:
+          N8N_VERSION: ${{ steps.source.outputs.version }}
+          N8N_RELEASE_TYPE: dev
+          PLATFORMS: linux/amd64
+          IMAGE_TAG: ${{ steps.source.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_url='https://github.com/witnessops/witnessops-n8n-fork'
+          n8n_image="ghcr.io/witnessops/witnessops-n8n-fork:${IMAGE_TAG}"
+          runners_image="ghcr.io/witnessops/witnessops-n8n-fork-runners:${IMAGE_TAG}"
+          distroless_image="ghcr.io/witnessops/witnessops-n8n-fork-runners:${IMAGE_TAG}-distroless"
+          bake_args=(
+            -f docker/docker-bake.hcl
+            n8n runners runners-distroless
+            --set "n8n.tag=${n8n_image}"
+            --set "runners.tag=${runners_image}"
+            --set "runners-distroless.tag=${distroless_image}"
+            --set 'n8n.output=type=docker'
+            --set 'runners.output=type=docker'
+            --set 'runners-distroless.output=type=docker'
+          )
+          for target in n8n runners runners-distroless; do
+            bake_args+=(
+              --set "${target}.label.org.opencontainers.image.source=${source_url}"
+              --set "${target}.label.org.opencontainers.image.revision=${GITHUB_SHA}"
+            )
+          done
+          docker buildx bake "${bake_args[@]}" --print > "$RUNNER_TEMP/witnessops-bake-plan.json"
+          node --input-type=module - "$RUNNER_TEMP/witnessops-bake-plan.json" \
+            "$n8n_image" "$runners_image" "$distroless_image" <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const [path, ...images] = process.argv.slice(2);
+          const plan = JSON.parse(readFileSync(path, 'utf8'));
+          const source = 'https://github.com/witnessops/witnessops-n8n-fork';
+          for (const [name, image] of Object.entries({
+            n8n: images[0],
+            runners: images[1],
+            'runners-distroless': images[2],
+          })) {
+            const target = plan.target?.[name];
+            assert.ok(target, name);
+            assert.deepEqual(target.tags, [image], name);
+            assert.deepEqual(target.platforms, ['linux/amd64'], name);
+            assert.equal(target.labels?.['org.opencontainers.image.source'], source, name);
+            assert.equal(target.labels?.['org.opencontainers.image.revision'], process.env.GITHUB_SHA, name);
+            assert.equal(target.output?.length, 1, name);
+            assert.equal(target.output[0].type, 'docker', name);
+            for (const [arg, value] of Object.entries(target.args ?? {})) {
+              if (/(?:_IMAGE|_REF)$/.test(arg)) {
+                assert.match(value, /@sha256:[0-9a-f]{64}$/, name + ' ' + arg);
+              }
+            }
+          }
+          NODE
+          docker buildx bake "${bake_args[@]}"
+          for image in "$n8n_image" "$runners_image" "$distroless_image"; do
+            test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.source" }}')" = "$source_url"
+            test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$GITHUB_SHA"
+            test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')" = "$N8N_VERSION"
+            docker image inspect "$image" --format '{{.RepoTags}} {{.Id}}'
+          done
