@@ -140,6 +140,66 @@ describe('evaluateStepCondition', () => {
 	});
 });
 
+describe('upstream reviewer integrations', () => {
+	for (const [file, jobName, eventTypes] of [
+		['ci-owners-assign-reviewers.yml', 'assign-reviewers', ['labeled', 'synchronize', 'reopened']],
+		[
+			'ci-owners-review-recommendations.yml',
+			'recommend-reviewers',
+			['opened', 'synchronize', 'reopened'],
+		],
+	]) {
+		it(`${jobName} uses the upstream App only for upstream PR events`, () => {
+			const workflow = workflowFile(file);
+			const triggers = triggersOf(workflow);
+			assert.deepEqual(Object.keys(triggers), ['pull_request']);
+			assert.deepEqual(triggers.pull_request.types, eventTypes);
+			assert.deepEqual(triggers.pull_request.branches, ['master']);
+
+			const job = workflow.jobs[jobName];
+			const condition = job.if.trim();
+			const guard = condition.match(/^github\.repository == '([^']+)' &&/);
+			assert.ok(guard, 'repository guard must run before token creation');
+			assert.equal(guard[1], 'n8n-io/n8n');
+			assert.match(condition, /head\.repo\.full_name == github\.repository/);
+			assert.equal(job.steps[0].name, 'Generate App Token');
+
+			const runsFor = ({ repository, event, action, headRepository }) =>
+				event === 'pull_request' &&
+				eventTypes.includes(action) &&
+				repository === guard[1] &&
+				headRepository === repository;
+			assert.equal(
+				runsFor({
+					repository: 'n8n-io/n8n',
+					event: 'pull_request',
+					action: 'synchronize',
+					headRepository: 'n8n-io/n8n',
+				}),
+				true,
+			);
+			assert.equal(
+				runsFor({
+					repository: 'witnessops/witnessops-n8n-fork',
+					event: 'pull_request',
+					action: 'synchronize',
+					headRepository: 'witnessops/witnessops-n8n-fork',
+				}),
+				false,
+			);
+			assert.equal(
+				runsFor({
+					repository: 'n8n-io/n8n',
+					event: 'pull_request_target',
+					action: 'synchronize',
+					headRepository: 'n8n-io/n8n',
+				}),
+				false,
+			);
+		});
+	}
+});
+
 describe('automated release PR CI bypass', () => {
 	const releasePrConjunction = [
 		"github.event.pull_request.user.login == 'n8n-assistant[bot]'",
