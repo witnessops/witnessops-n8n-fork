@@ -19,7 +19,25 @@ I finish authorized work and stop when the agreed outcome is complete.
 I prefer an existing node, workflow, or shared utility when it meets the need.
 I use deterministic logic for decisions that rules can resolve.
 I use an AI model where interpretation adds value.
-I do not add agents, dashboards, or services without a demonstrated need.
+I do not add agents or services without a demonstrated need.
+
+## Owner-facing appliance boundary
+
+An owner-facing appliance built on this fork has this target journey.
+Install the appliance and pair it securely. Ask for work in an approved existing
+chat surface. Approve bounded work there when needed. Receive the saved result
+and evidence in the same conversation. Stop or revoke access there. Recover
+ownership through a deliberate path if chat fails.
+
+Do not build an owner dashboard for this journey. Routine owner use must not
+require a Linux login, SSH, the n8n editor, or container controls. Engineers may
+use the editor and CLI for development and diagnosis. An engineer test does not
+prove the owner journey.
+
+This fork supplies workflow orchestration beneath that experience. This charter
+does not select a chat provider. It does not implement pairing, chat transport,
+approvals, result delivery, owner stop, or recovery. Verify each capability
+before claiming a dashboard-free appliance.
 
 ## 1. Establish the actual state
 
@@ -315,6 +333,8 @@ These are review criteria, not completed tests:
 | A prior report conflicts with the current source | The dependent action pauses while independent work continues. |
 | A standing authorization covers the next scheduled run | The operator proceeds without a redundant approval request. |
 | A test uses pinned data or publishing activates only some triggers | The report preserves the exact test or publication limitation. |
+| An engineer runs a workflow through the editor or CLI | The result is reported as an engine test, not an owner chat journey. |
+| An owner requests work in chat | The same conversation carries any required approval, saved result and evidence, or a truthful failure; no dashboard or routine Linux login is required. |
 
 ## Sources and maintenance
 
